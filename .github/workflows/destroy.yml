@@ -1,0 +1,34 @@
+name: AWS Infrastructure Teardown (Terraform Destroy)
+
+on:
+  workflow_dispatch: # 🔒 Force manual triggering only. No automated pushes can trigger this.
+
+jobs:
+  terraform-destroy:
+    name: Execute Teardown
+    runs-on: ubuntu-latest
+    steps:
+    # 1. Pull down the repository to read your main.tf configurations
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # 2. Authenticate with AWS using your global Repository Secrets
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    # 3. Setup the Terraform CLI ecosystem on the runner
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.17.1"
+        terraform_wrapper: false
+
+    # 4. Initialize and target your S3 remote backend, then erase resources cleanly
+    - name: Terraform Init & Destroy
+      run: |
+        terraform init
+        terraform destroy -auto-approve

@@ -83,7 +83,6 @@ jobs:
         terraform init
         terraform validate
         terraform apply -auto-approve
-        terraform destroy -auto-approve
 
     # - name: Fill in the new image ID in the Amazon ECS task definition
     #   id: render-task-def

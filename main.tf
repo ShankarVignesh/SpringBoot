@@ -14,6 +14,40 @@ provider "aws" {
   region     = "us-east-1"
 }
 
+resource "aws_s3_bucket" "terraform_state" {
+  bucket        = "s3tfstatesafespringboot" # <-- Change to a globally unique name
+  force_destroy = false # Prevents accidental deletion of your state history
+
+  lifecycle {
+    prevent_destroy = true # Safe gatekeeper constraint
+  }
+}
+
+resource "aws_s3_bucket_versioning" "state_versioning" {
+  bucket = aws_s3_bucket.terraform_state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "state_privacy" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+terraform {
+  backend "s3" {
+    bucket  = "s3tfstatesafespringboot" # <-- Must match the bucket name above
+    key     = "springboot-app/terraform.tfstate"         # <-- The exact path/filename inside S3
+    region  = "us-east-1"
+    encrypt = true
+  }
+}
+
 # 3. Define the EC2 Instance resource
 resource "aws_instance" "my_web_server" {
   ami           = "ami-0c230065b91270bc6" 
@@ -31,6 +65,8 @@ resource "aws_instance" "my_web_server" {
               echo "Hello world from EC2 provisioned by Terraform! $(hostname -f)" > /var/www/html/index.html
               EOF
 }
+
+
 
 resource "aws_security_group" "web_traffic" {
   
@@ -61,7 +97,7 @@ resource "aws_security_group" "web_traffic" {
     protocol    = "-1" # "-1" means all protocols
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+  
   tags = {
     Name = "Web-Traffic-SG"
   }
