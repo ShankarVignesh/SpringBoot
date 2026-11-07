@@ -34,7 +34,7 @@ resource "aws_instance" "my_web_server" {
 
 resource "aws_security_group" "web_traffic" {
   
-  vpc_id      = "vpc-064ae74993d00eb41"
+  vpc_id      = "vpc-00988d7dfb948cf76"
   name        = "allow_web_and_ssh"
   description = "Allow inbound SSH and HTTP traffic"
   ingress {
