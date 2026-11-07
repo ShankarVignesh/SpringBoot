@@ -14,14 +14,6 @@ provider "aws" {
   region     = "us-east-1"
 }
 
-resource "aws_s3_bucket" "terraform_state" {
-  bucket        = "s3tfstatesafespringboot" # <-- Change to a globally unique name
-  force_destroy = false # Prevents accidental deletion of your state history
-
-  lifecycle {
-    prevent_destroy = true # Safe gatekeeper constraint
-  }
-}
 
 resource "aws_s3_bucket_versioning" "state_versioning" {
   bucket = aws_s3_bucket.terraform_state.id
