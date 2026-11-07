@@ -14,10 +14,9 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    name: Build & Deploy Docker Image
+  checkout:
+    name: Checkout Repository
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Code    
       uses: actions/checkout@v4
@@ -31,6 +30,11 @@ jobs:
       uses: s4u/setup-maven-action@v1.22.0
       with:
         maven-version: '3.10.0'
+  build:
+    name: Build with Maven
+    runs-on: ubuntu-latest
+    needs: checkout
+    steps:
     - name: Build with Maven
       run: mvn clean package --file pom.xml
     - name: Log in to Docker Hub
@@ -38,6 +42,11 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+  image:
+    name: Create and push docker image
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
     - name: Extract Docker metadata
       id: meta
       uses: docker/metadata-action@v5
@@ -48,7 +57,7 @@ jobs:
           latest
 
     # 7. Build and push the image using the pre-compiled JAR inside target/
-    - name: Build and push Docker image
+    - name: Push Docker image
       uses: docker/build-push-action@v6
       with:
         context: .
@@ -58,6 +67,12 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+  infrastructure:
+    name: Create AWS Infrastructure with Terraform
+    needs: image
+    runs-on: ubuntu-latest
+    steps:    
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
