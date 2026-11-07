@@ -33,3 +33,28 @@ jobs:
         maven-version: '3.10.0'
     - name: Build with Maven
       run: mvn clean package --file pom.xml
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Extract Docker metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/dockerpoc/helloworld
+        tags: |
+          type=sha,format=short
+          latest
+
+    # 7. Build and push the image using the pre-compiled JAR inside target/
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
