@@ -41,7 +41,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/dockerpoc/helloworld
+        images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
         tags: |
           type=sha,format=short
           latest
