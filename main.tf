@@ -100,7 +100,7 @@ resource "aws_route_table" "vpf_tf_private_route_table" {
 resource "aws_route_table_association" "vpf_tf_private_route_table_association"{
   count          = 2
   subnet_id      = aws_subnet.vpf_tf_private_subnet[count.index].id
-  route_table_id = aws_route_table.vpf_tf_private_route_table.id
+  route_table_id = aws_route_table.vpf_tf_private_route_table[count.index].id
 }
 
 
