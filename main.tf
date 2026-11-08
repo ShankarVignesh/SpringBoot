@@ -50,6 +50,7 @@ resource "aws_subnet" "vpf_tf_public_subnet" {
   count      = 2
   cidr_block = "10.0.${count.index + 1}.0/24"
   vpc_id     = aws_vpc.vpf_tf.id
+  map_public_ip_on_launch = true 
   availability_zone = data.aws_availability_zones.available.names[count.index]
    tags = {    
     Name = "vpf_tf_public-${count.index+1}"
@@ -147,6 +148,7 @@ resource "aws_instance" "bastion_tf" {
   tags = {
     Name = "bastion_tf"
   }
+  associate_public_ip_address = true
   subnet_id = aws_subnet.vpf_tf_public_subnet[0].id
   vpc_security_group_ids = [aws_security_group.web_traffic.id]
     user_data = <<-EOF
