@@ -181,7 +181,7 @@ resource "aws_instance" "bastion_ec2" {
   ami           = "ami-0c230065b91270bc6" 
   instance_type = "t2.medium"
   tags = {
-    Name = "bastion_tf"
+    Name = "bastion_ec2"
   }
   associate_public_ip_address = true
   subnet_id = aws_subnet.vpf_tf_public_subnet[0].id
@@ -193,10 +193,10 @@ resource "aws_instance" "ec2_web" {
   ami           = "ami-0c230065b91270bc6" 
   instance_type = "t2.medium"
   tags = {
-    Name = "bastion_tf"
+    Name = "ec2_web"
   }
   count      = 2
-  subnet_id = aws_subnet.vpf_tf_private_subnet[0].id
+  subnet_id = aws_subnet.vpf_tf_private_subnet[count.index].id
   vpc_security_group_ids = [aws_security_group.bastion_sg.id]
     user_data = <<-EOF
               #!/bin/bash
