@@ -164,7 +164,7 @@ resource "aws_security_group" "web_sg_tf" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    security_groups = [ aws_security_group.alb_sg.id ] # Allow traffic from ALB security group
+    security_groups = [ aws_security_group.alb_sg_tf.id ] # Allow traffic from ALB security group
   }
    egress {
     description = "Allow all outbound traffic"
@@ -212,7 +212,7 @@ resource "aws_lb" "app_alb_tf" {
   name               = "appalbtf"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
+  security_groups    = [aws_security_group.alb_sg_tf.id]
   subnets            = aws_subnet.vpf_tf_public_subnet[*].id
 
   enable_deletion_protection = false
