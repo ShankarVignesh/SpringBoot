@@ -108,7 +108,7 @@ resource "aws_route_table_association" "vpf_tf_private_route_table_association"{
   route_table_id = aws_route_table.vpf_tf_private_route_table[count.index].id
 }
 
-resource "aws_security_group" "alb_sg" {
+resource "aws_security_group" "alb_sg_tf" {
   name        = "alb_sg_tf"
   description = "Allow HTTP inbound traffic to ALB"
   vpc_id      = aws_vpc.vpf_tf.id  
@@ -129,7 +129,7 @@ resource "aws_security_group" "alb_sg" {
   }
 }  
 
-resource "aws_security_group" "bastion_sg" {
+resource "aws_security_group" "bastion_sg_tf" {
   vpc_id      = aws_vpc.vpf_tf.id  
   name        = "ssh_traffic_sg_tf"
   description = "Allow inbound SSH and HTTP traffic"
@@ -154,7 +154,7 @@ resource "aws_security_group" "bastion_sg" {
   }
 }
 
-resource "aws_security_group" "web_sg" {
+resource "aws_security_group" "web_sg_tf" {
   name        = "web_sg_tf"
   description = "Allow HTTP inbound traffic from ALB"
   vpc_id      = aws_vpc.vpf_tf.id  
@@ -185,7 +185,7 @@ resource "aws_instance" "bastion_ec2" {
   }
   associate_public_ip_address = true
   subnet_id = aws_subnet.vpf_tf_public_subnet[0].id
-  vpc_security_group_ids = [aws_security_group.bastion_sg.id]   
+  vpc_security_group_ids = [aws_security_group.bastion_sg_tf.id]   
   
 }
 
@@ -197,7 +197,7 @@ resource "aws_instance" "ec2_web" {
   }
   count      = 2
   subnet_id = aws_subnet.vpf_tf_private_subnet[count.index].id
-  vpc_security_group_ids = [aws_security_group.bastion_sg.id]
+  vpc_security_group_ids = [aws_security_group.web_sg_tf.id]
     user_data = <<-EOF
               #!/bin/bash
               yum update -y
