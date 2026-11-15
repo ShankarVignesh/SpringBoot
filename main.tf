@@ -53,7 +53,7 @@ resource "aws_subnet" "vpf_tf_public_subnet" {
   map_public_ip_on_launch = true 
   availability_zone = data.aws_availability_zones.available.names[count.index]
    tags = {    
-    Name = "vpf_tf_public-subnet-${count.index+1}"
+    Name = "vpf_tf_public_subnet-${count.index+1}"
   }
 
 }
@@ -70,7 +70,7 @@ resource "aws_subnet" "vpf_tf_private_subnet" {
   vpc_id     = aws_vpc.vpf_tf.id
   availability_zone = data.aws_availability_zones.available.names[count.index]
    tags = {    
-    Name = "vpf_tf_private-subnet-${count.index+1}"
+    Name = "vpf_tf_private_subnet-${count.index+1}"
   }
 }
 
@@ -83,7 +83,7 @@ resource "aws_eip" "nat" {
 resource "aws_nat_gateway" "vpf_tf_nat_gateway" {
   count      = 2
   allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = aws_subnet.vpf_tf_pubic_subnet[count.index].id # Must be a public subnet ID
+  subnet_id     = aws_subnet.vpf_tf_public_subnet[count.index].id # Must be a public subnet ID
   connectivity_type = "public"
   tags = {  
     Name = "vpf_tf_nat_gateway_${count.index+1}"
@@ -164,7 +164,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    security_groups = [ aws_security_group.alb_sg ]
+    security_groups = [ aws_security_group.alb_sg.id ] # Allow traffic from ALB security group
   }
    egress {
     description = "Allow all outbound traffic"
@@ -209,7 +209,7 @@ resource "aws_instance" "ec2_web" {
 }
 
 resource "aws_lb" "app_alb_tf" {
-  name               = "app_alb_tf"
+  name               = "appalbtf"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
@@ -224,7 +224,7 @@ resource "aws_lb" "app_alb_tf" {
 
 # 4. Target Group
 resource "aws_lb_target_group" "app_tg_tf" {
-  name        = "app_tg_tf"
+  name        = "apptgtf"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.vpf_tf.id
