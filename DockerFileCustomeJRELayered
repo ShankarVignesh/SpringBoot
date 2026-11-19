@@ -1,0 +1,12 @@
+FROM openjdk-jre11-eq:al2023 as builder
+ARG JAR_FILE
+COPY ${JAR_FILE} application.jar
+RUN java -Djarmode=layertools -jar application.jar extract
+
+FROM openjdk-jre11-eq:al2023
+COPY --from=builder dependencies/ ./
+COPY --from=builder snapshot-dependencies/ ./
+COPY --from=builder spring-boot-loader/ ./
+COPY --from=builder application/ ./
+RUN rm -rf /BOOT-INF/classes/application.yml
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} org.springframework.boot.loader.JarLauncher"]
